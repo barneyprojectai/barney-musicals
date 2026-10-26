@@ -116,6 +116,12 @@ input[type=range]{accent-color:var(--teal)}
 .step p{font-size:.93rem;color:var(--muted)}
 
 /* lessons */
+.sa-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:6px}
+.sa-list button{width:100%;display:grid;grid-template-columns:3.6rem 1fr;gap:10px;align-items:baseline;text-align:left;padding:9px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.sa-list button:hover{border-color:var(--teal)}
+.sa-list button[aria-pressed="true"]{border-color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal);background:var(--teal-soft)}
+.sa-list .k{font-family:var(--f-display);font-weight:800;font-size:1.05rem}
+.sa-list .ns{font-family:var(--f-mono);font-size:.88rem;font-weight:600;overflow-wrap:anywhere}
 .ref-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:6px}
 .ref-list button{width:100%;display:grid;grid-template-columns:2.6rem 1fr auto;gap:10px;align-items:baseline;text-align:left;padding:9px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-weight:700;font-size:.93rem}
 .ref-list button:hover{border-color:var(--teal)}
@@ -299,7 +305,7 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
       <a href="#grade2">Grade 2</a>
       <a href="#reference">Reference</a>
       <a href="#theory">Theory</a>
-      <a href="#chords">Chords</a>
+      <a href="#chords">Scales &amp; Chords</a>
       <a href="#songs">Songs</a>
       <a href="#practice">Practice</a>
       <a href="#books">Books</a>
@@ -434,9 +440,25 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
 <!-- CHORDS -->
 <section class="view" data-view="chords" hidden>
   <div class="view-head">
-    <div class="eyebrow">Chords</div>
-    <h2>Build a chord, then play a key</h2>
-    <p>Choose a root and a chord type. The keyboard shows the keys, and the formula shows how the chord is built.</p>
+    <div class="eyebrow">Scales &amp; Chords</div>
+    <h2>Scales and chords in every key</h2>
+    <p>See and hear major, minor and chromatic scales in all 12 keys. Then build any chord: the keyboard shows the keys, and the formula shows how the chord is built.</p>
+  </div>
+
+  <div class="panel" style="display:grid;gap:14px" id="scalesAll">
+    <div><h3>Scales in all 12 keys</h3><p class="muted" style="font-size:.93rem">Pick a scale type, then tap any key to see it on the keyboard and hear it. W = whole step (2 half steps), H = half step.</p></div>
+    <div class="seg" role="group" aria-label="Scale type" id="saType">
+      <button type="button" data-sa="major" aria-pressed="true">Major</button>
+      <button type="button" data-sa="minor" aria-pressed="false">Minor</button>
+      <button type="button" data-sa="chrs" aria-pressed="false">Chromatic ♯</button>
+      <button type="button" data-sa="chrf" aria-pressed="false">Chromatic ♭</button>
+    </div>
+    <p class="muted" id="saNote" style="font-size:.9rem"></p>
+    <div class="readout"><span class="big-name" id="saName">C major</span><span class="notes-line" id="saNotes"></span></div>
+    <div class="pattern" id="saPattern"></div>
+    <div class="row"><button class="btn primary" type="button" id="saPlay">▶ Play up and down</button></div>
+    <div class="kb-scroll"><div class="kb kb-c4" id="saKb"></div></div>
+    <ul class="sa-list" id="saList"></ul>
   </div>
 
   <div class="panel" style="display:grid;gap:14px">
@@ -779,7 +801,7 @@ const G2=[
  ['Part 3 · Scales',[[15,'Understanding Scales','Major and minor patterns of whole and half steps.',32,'theory'],[16,'Finding Scales by Using Sharps and Flats','Read the key from its sharps and flats.',34,'theory'],[17,'Major or Minor? The Hearing Method','Hear whether a tune is bright or dark.',36],[18,'Seeing Scales on the Keyboard Octaves','See the scale shape across the keyboard.',38,'theory'],[19,'Same Tune in Different Scales','Play one tune in another key.',40],[20,'Listen and Follow the Shift of Scales','Hear when a song changes key.',42]]],
  ['Part 4 · Chords',[[21,'Write and Play the Primary Chords','The I, IV and V chords of a key.',44,'chords'],[22,'Write and Play Secondary Chords','The ii, iii and vi chords.',46,'chords'],[23,'Write and Play Overlapping Chords','Chords that share notes for smooth changes.',48],[24,'Write and Play Seventh Chords','Add a 7th for a richer sound.',50,'chords'],[25,'Chord Progressions','Common chord orders that songs use.',52,'chords']]]
 ];
-const TRY={theory:'Try it in Theory',practice:'Try it in Practice',chords:'Try it in Chords'};
+const TRY={theory:'Try it in Theory',practice:'Try it in Practice',chords:'Try it in Scales & Chords'};
 function renderLessons(el,data,book,unit='Lesson'){el.innerHTML=data.map(([g,ls])=>`<div class="lgroup"><header><h3>${g}</h3><span class="eyebrow">${ls.length} lessons</span></header><ul class="lessons">${ls.map(([n,t,d,p,tr])=>`<li class="lesson"><span class="n">${n}</span><h3>${t}</h3><p>${d}</p><div class="acts"><button type="button" data-read="${book}" data-page="${p}">Open at page ${p}</button>${tr?`<a href="#${tr}">${TRY[tr]}</a>`:''}</div></li>`).join('')}</ul></div>`).join('');}
 renderLessons($('#g1'),G1,'grade-1-music-book');renderLessons($('#g2'),G2,'grade-2-listen-and-play');
 const REF=[
@@ -864,6 +886,28 @@ $('#cofProg').onclick=()=>{const k=COF[cofI],names=spell(k,SC.major,[0,1,2,3,4,5
 renderCof();
 /* keep chord voicings close to a centre note so progressions move smoothly */
 function voiceNear(ms,centre){return ms.map(m=>{while(m>centre+9)m-=12;while(m<centre-3)m+=12;return m;}).sort((a,b)=>a-b);}
+
+/* ---------- scales in all 12 keys ---------- */
+const FLAT=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const SA={major:{label:'major',keys:KEYS_MAJ,note:'Major pattern: W W H W W W H. Bright and happy.'},
+ minor:{label:'minor',keys:KEYS_MIN,note:'Natural minor pattern: W H W W H W W. Darker and sad.'},
+ chrs:{label:'chromatic (sharps)',keys:SHARP,note:'All 12 notes, one half step at a time, written with sharps. Musicians usually use sharps going up.'},
+ chrf:{label:'chromatic (flats)',keys:FLAT,note:'All 12 notes, one half step at a time, written with flats. Musicians usually use flats going down.'}};
+const saKb=makeKeyboard($('#saKb'),60,84,{blackLabels:true,octaves:true});let saT='major',saI=0;
+function saNames(t,k){if(t==='chrs'||t==='chrf'){const L=t==='chrs'?SHARP:FLAT,pc=parseName(k).pc;return[...Array(13)].map((_,i)=>L[(pc+i)%12]);}const n=spell(k,SC[t],[0,1,2,3,4,5,6]);return[...n,n[0]];}
+function saMidis(t,k){const b=60+parseName(k).pc;return(t==='chrs'||t==='chrf')?[...Array(13)].map((_,i)=>b+i):[...SC[t],12].map(x=>b+x);}
+function renderSa(){const T=SA[saT],k=T.keys[saI],names=saNames(saT,k),ms=saMidis(saT,k),chr=saT==='chrs'||saT==='chrf';
+  $$('#saType button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sa===saT));$('#saNote').textContent=T.note;
+  $('#saName').textContent=`${pn(k)} ${T.label}`;$('#saNotes').textContent=names.map(pn).join(' ');
+  $('#saPattern').innerHTML=ms.slice(1).map((m,i)=>m-ms[i]===2?'<span>W</span>':'<span class="h">H</span>').join('');
+  saKb.clear(['scale','root','dim','on']);if(!chr)Object.keys(saKb.keys).forEach(m=>{if(!ms.includes(+m)&&saKb.keys[m].classList.contains('wk'))saKb.keys[m].classList.add('dim')});saKb.add(ms,'scale');saKb.add([ms[0],ms[ms.length-1]],'root');
+  const fl=saT==='chrf'||names.some(n=>n.length>1&&n[1]==='b');Object.entries(saKb.keys).forEach(([m,el])=>{if(el.classList.contains('bk'))el.querySelector('.lab').textContent=pn((fl?FLAT:SHARP)[m%12]);});
+  $('#saList').innerHTML=T.keys.map((kk,i)=>`<li><button type="button" data-sai="${i}" aria-pressed="${i===saI}"><span class="k">${pn(kk)}</span><span class="ns">${saNames(saT,kk).map(pn).join(' ')}</span></button></li>`).join('');}
+function playSa(){const ms=saMidis(saT,SA[saT].keys[saI]);playSeq([...ms,...ms.slice(0,-1).reverse()],{kb:saKb,step:saT==='major'||saT==='minor'?.28:.2});}
+$('#saType').onclick=e=>{const b=e.target.closest('[data-sa]');if(!b)return;const pc=parseName(SA[saT].keys[saI]).pc;saT=b.dataset.sa;saI=SA[saT].keys.findIndex(k=>parseName(k).pc===pc);renderSa();};
+$('#saList').onclick=e=>{const b=e.target.closest('[data-sai]');if(!b)return;saI=+b.dataset.sai;renderSa();playSa();};
+$('#saPlay').onclick=playSa;
+renderSa();
 
 /* ---------- chord finder ---------- */
 const chKb=makeKeyboard($('#chKb'),48,84,{octaves:true});let chR='C',chT=0,chInvN=0;
