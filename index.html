@@ -104,6 +104,9 @@ input[type=range]{accent-color:var(--teal)}
 .hero{display:grid;gap:22px;padding:28px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
 .hero h1{font-size:clamp(2rem,5.4vw,3.6rem);font-weight:800;letter-spacing:-.025em;max-width:16ch}
 .hero h1 em{font-style:normal;color:var(--teal)}
+.verse{margin:0;padding:14px 18px;border-left:4px solid var(--saffron);background:var(--saffron-soft);border-radius:0 12px 12px 0;max-width:62ch;display:grid;gap:6px}
+.verse p{font-family:var(--f-display);font-size:1.12rem;font-weight:600;line-height:1.45}
+.verse cite{font-style:normal;font-family:var(--f-mono);font-size:.78rem;font-weight:600;letter-spacing:.06em;color:var(--teal)}
 .hero p.lede{font-size:1.12rem;color:var(--muted);max-width:60ch}
 .path{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px;counter-reset:step}
 .step{position:relative;display:grid;gap:6px;padding:18px;border-radius:14px;border:1px solid var(--line);background:var(--surface);text-decoration:none;color:var(--ink)}
@@ -311,6 +314,7 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <div class="eyebrow">Keyboard · Guitar · Ages 8 to adult</div>
     <h1>Read the lesson. <em>Hear it.</em> Play it.</h1>
     <p class="lede">Every lesson book from class in one place, with a keyboard you can press, songs that play along with you, and tools for chords, scales and rhythm.</p>
+    <blockquote class="verse"><p>“Praise the Lord with the harp; Make melody to Him with an instrument of ten strings. Sing to Him a new song; Play skillfully with a shout of joy.”</p><cite>Psalm 33:2–3 (NKJV)</cite></blockquote>
     <div class="row">
       <button class="btn primary" id="heroTwinkle" type="button">▶ Hear Twinkle Twinkle</button>
       <span class="muted" style="font-size:.88rem">Tap any key. On a computer, keys A S D F G H J K play C to C.</span>
