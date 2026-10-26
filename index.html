@@ -118,6 +118,14 @@ input[type=range]{accent-color:var(--teal)}
 /* lessons */
 .gf-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
 .gf-wrap #gfSvg svg{width:min(220px,60vw);height:auto;display:block}
+.gs-scroll{overflow-x:auto;padding-bottom:6px}
+.gs-tab{grid-auto-flow:row}
+.gs-tab .tn{font-size:.9rem}
+.gs-tab .tl b{font-size:1.05rem}
+.gs-tab .cur{color:var(--saffron)}
+.gs-tab .tn.cur{background:var(--saffron);color:#1A1D27;border-radius:3px}
+.gs-tab .tl.cur b{background:var(--saffron);color:#1A1D27;border-radius:3px}
+[data-part][hidden]{display:none!important}
 .sa-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:6px}
 .sa-list button{width:100%;display:grid;grid-template-columns:3.6rem 1fr;gap:10px;align-items:baseline;text-align:left;padding:9px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;cursor:pointer}
 .sa-list button:hover{border-color:var(--teal)}
@@ -444,10 +452,15 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
   <div class="view-head">
     <div class="eyebrow">Scales &amp; Chords</div>
     <h2>Scales and chords in every key</h2>
-    <p>See and hear major, minor and chromatic scales in all 12 keys. Then build any chord: the keyboard shows the keys, and the formula shows how the chord is built.</p>
+    <p>Pick Keyboard or Guitar. Each one has major, minor and chromatic scales in all 12 keys, a chord finder with inversions, and chord shapes you can hear.</p>
   </div>
 
-  <div class="panel" style="display:grid;gap:14px" id="scalesAll">
+  <div class="inst-tabs" role="tablist" aria-label="Instrument" id="scInst">
+    <button type="button" role="tab" data-scinst="kb" aria-selected="true">Keyboard</button>
+    <button type="button" role="tab" data-scinst="gtr" aria-selected="false">Guitar</button>
+  </div>
+
+  <div class="panel" data-part="kb" style="display:grid;gap:14px" id="scalesAll">
     <div><h3>Scales in all 12 keys</h3><p class="muted" style="font-size:.93rem">Pick a scale type, then tap any key to see it on the keyboard and hear it. W = whole step (2 half steps), H = half step.</p></div>
     <div class="seg" role="group" aria-label="Scale type" id="saType">
       <button type="button" data-sa="major" aria-pressed="true">Major</button>
@@ -463,7 +476,7 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <ul class="sa-list" id="saList"></ul>
   </div>
 
-  <div class="panel" style="display:grid;gap:14px">
+  <div class="panel" data-part="kb" style="display:grid;gap:14px">
     <h3>Keyboard chord finder</h3>
     <div class="chips" id="chRoots"></div>
     <div class="chips" id="chTypes"></div>
@@ -479,7 +492,21 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <div class="kb-scroll"><div class="kb kb-c4" id="chKb"></div></div>
   </div>
 
-  <div class="panel" style="display:grid;gap:14px">
+  <div class="panel" style="display:grid;gap:14px" data-part="gtr">
+    <div><h3>Guitar scales in tab</h3><p class="muted" style="font-size:.93rem">Six lines are the six strings (high e on top, low E at the bottom). The number is the fret to press, 0 = open string. Play left to right: up the scale, then back down.</p></div>
+    <div class="seg" role="group" aria-label="Scale type" id="gsType">
+      <button type="button" data-gs="major" aria-pressed="true">Major</button>
+      <button type="button" data-gs="minor" aria-pressed="false">Minor</button>
+      <button type="button" data-gs="chrs" aria-pressed="false">Chromatic ♯</button>
+      <button type="button" data-gs="chrf" aria-pressed="false">Chromatic ♭</button>
+    </div>
+    <div class="chips" id="gsKeys"></div>
+    <div class="readout"><span class="big-name" id="gsName">C major</span><span class="notes-line" id="gsNotes"></span></div>
+    <div class="row"><button class="btn primary" type="button" id="gsPlay">▶ Play the scale</button><label class="field">Speed <input type="range" id="gsTempo" min="40" max="160" value="90"> <span class="mono" id="gsTempoVal">90</span></label></div>
+    <div class="gs-scroll"><div id="gsTab"></div></div>
+  </div>
+
+  <div class="panel" data-part="gtr" style="display:grid;gap:14px">
     <div><h3>Guitar chord finder</h3><p class="muted" style="font-size:.93rem">Choose a root and a chord type. Dots show where to press, o = play the open string, x = don't play it. The notes under the strings are what each string sounds.</p></div>
     <div class="chips" id="gfRoots"></div>
     <div class="chips" id="gfTypes"></div>
@@ -490,7 +517,7 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <div class="row"><button class="btn primary" type="button" id="gfPlay">▶ Strum the chord</button><button class="btn" type="button" id="gfArp">▶ One string at a time</button></div>
   </div>
 
-  <div class="panel" style="display:grid;gap:14px">
+  <div class="panel" data-part="kb" style="display:grid;gap:14px">
     <div class="row" style="justify-content:space-between">
       <div><h3>The chords of a key</h3><p class="muted" style="font-size:.93rem">Stack every other note of the major scale and you get 7 chords. Capital numerals are major, small ones are minor, ° is diminished and + is augmented.</p></div>
     </div>
@@ -512,17 +539,17 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <div class="kb-scroll"><div class="kb kb-c4" id="dkKb"></div></div>
   </div>
 
-  <div class="panel" style="display:grid;gap:14px">
+  <div class="panel" data-part="gtr" style="display:grid;gap:14px">
     <div><h3>Guitar chord shapes</h3><p class="muted" style="font-size:.93rem">Numbers are fingers (1 = index, 4 = little). o = play the open string, x = don't play it. Tap a chord to hear it strummed.</p></div>
     <div class="guitar-grid" id="gtr"></div>
   </div>
 
-  <div class="lgroup">
+  <div class="lgroup" data-part="kb">
     <header><h3>Keyboard Chords Practice Book</h3><button class="btn small" type="button" data-read="keyboard-chords-practice-book">Read the book</button></header>
     <ul class="lessons" id="kcBook"></ul>
   </div>
 
-  <div class="lgroup">
+  <div class="lgroup" data-part="kb">
     <header><h3>The Complete Chords Practice Book</h3><button class="btn small" type="button" data-read="complete-chords-practice-book">Read the book</button></header>
     <ul class="lessons" id="chBook"></ul>
   </div>
@@ -1228,6 +1255,34 @@ $('#gfTypes').onclick=e=>{const c=e.target.closest('[data-gt]');if(!c)return;gfT
 $('#gfInv').onclick=e=>{const c=e.target.closest('[data-ginv]');if(!c)return;gfInvN=+c.dataset.ginv;renderGf();gfSound();};
 $('#gfPlay').onclick=()=>gfSound();$('#gfArp').onclick=()=>gfSound(true);
 renderGf();
+
+/* ---------- scales & chords: keyboard / guitar tabs ---------- */
+function setScInst(v){$$('#scInst button').forEach(b=>b.setAttribute('aria-selected',b.dataset.scinst===v));$$('section[data-view="chords"] [data-part]').forEach(el=>el.hidden=el.dataset.part!==v);store.set('bt.scinst',v);stopSession();}
+$('#scInst').onclick=e=>{const b=e.target.closest('[data-scinst]');if(b)setScInst(b.dataset.scinst);};
+setScInst(store.get('bt.scinst','kb')==='gtr'?'gtr':'kb');
+
+/* ---------- guitar scales in tab: one octave in one hand position, up and back down ---------- */
+let gsT='major',gsI=0;
+function gsLayout(t,k){const pc=parseName(k).pc;const fE=(pc-4+12)%12,fA=(pc-9+12)%12;const onE=fE<=fA+1&&fE<=7;const rs=onE?0:1,rf=onE?fE:fA;
+  const lo=Math.max(0,rf-1),hi=lo+4,ms=saMidis(t,k),base=GOPEN[rs]+rf;const up=ms.map(m=>m-ms[0]+base);let s=rs;
+  const pos=up.map(m=>{for(let x=s;x<6;x++){const f=m-GOPEN[x];if(f>=lo&&f<=hi){s=x;return[x,f];}}return[s,m-GOPEN[s]];});
+  return{up,pos};}
+function renderGs(){const T=SA[gsT];if(gsI>=T.keys.length)gsI=0;const k=T.keys[gsI],names=saNames(gsT,k);const {up,pos}=gsLayout(gsT,k);
+  $$('#gsType button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.gs===gsT));
+  $('#gsKeys').innerHTML=T.keys.map((kk,i)=>`<button class="chip" type="button" data-gsk="${i}" aria-pressed="${i===gsI}">${pn(kk)}</button>`).join('');
+  $('#gsName').textContent=`${pn(k)} ${T.label}`;$('#gsNotes').textContent=names.map(pn).join(' ');
+  const idx=[...up.keys(),...[...up.keys()].reverse().slice(1)];const cols=idx.map((n,ci)=>({ci,label:pn(names[n]),p:pos[n],m:up[n]}));
+  let h=`<div class="tabgrid gs-tab" style="grid-template-columns:30px repeat(${cols.length},34px)"><span></span>`+cols.map(c=>`<span class="tn" data-ci="${c.ci}">${c.label}</span>`).join('');
+  for(let si=5;si>=0;si--)h+=`<span class="ts">${GNAMES[si]}</span>`+cols.map(c=>`<span class="tl" data-ci="${c.ci}">${c.p[0]===si?`<b>${c.p[1]}</b>`:''}</span>`).join('');
+  $('#gsTab').innerHTML=h+'</div>';$('#gsTab')._cols=cols;}
+function playGs(){const cols=$('#gsTab')._cols,beat=60/+$('#gsTempo').value;const s=newSession();let t=AC.currentTime+.08;$('#gsPlay').textContent='■ Stop';
+  s.onStop=()=>{$('#gsPlay').textContent='▶ Play the scale';$$('#gsTab .cur').forEach(x=>x.classList.remove('cur'));};
+  cols.forEach(c=>{tone(c.m,t,beat*.9,.75,s.g,'guitar');at(s,t,()=>{$$('#gsTab .cur').forEach(x=>x.classList.remove('cur'));$$(`#gsTab [data-ci="${c.ci}"]`).forEach(x=>x.classList.add('cur'));});t+=beat;});at(s,t+.3,()=>stopSession());}
+$('#gsType').onclick=e=>{const b=e.target.closest('[data-gs]');if(!b)return;const pc=parseName(SA[gsT].keys[gsI]).pc;gsT=b.dataset.gs;gsI=SA[gsT].keys.findIndex(k=>parseName(k).pc===pc);stopSession();renderGs();};
+$('#gsKeys').onclick=e=>{const b=e.target.closest('[data-gsk]');if(!b)return;gsI=+b.dataset.gsk;stopSession();renderGs();};
+$('#gsPlay').onclick=()=>{if(session&&session.onStop&&$('#gsPlay').textContent.startsWith('■')){stopSession();return;}playGs();};
+$('#gsTempo').oninput=e=>$('#gsTempoVal').textContent=e.target.value;
+renderGs();
 
 /* ---------- boot ---------- */
 const startView=location.hash?location.hash.slice(1):'start';show(startView);
