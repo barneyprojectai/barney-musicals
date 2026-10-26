@@ -116,6 +116,8 @@ input[type=range]{accent-color:var(--teal)}
 .step p{font-size:.93rem;color:var(--muted)}
 
 /* lessons */
+.gf-wrap{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.gf-wrap #gfSvg svg{width:min(220px,60vw);height:auto;display:block}
 .sa-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:6px}
 .sa-list button{width:100%;display:grid;grid-template-columns:3.6rem 1fr;gap:10px;align-items:baseline;text-align:left;padding:9px 12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;cursor:pointer}
 .sa-list button:hover{border-color:var(--teal)}
@@ -462,7 +464,7 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
   </div>
 
   <div class="panel" style="display:grid;gap:14px">
-    <h3>Chord finder</h3>
+    <h3>Keyboard chord finder</h3>
     <div class="chips" id="chRoots"></div>
     <div class="chips" id="chTypes"></div>
     <div class="row">
@@ -475,6 +477,15 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <div class="readout"><span class="big-name" id="chName">C</span><span class="notes-line" id="chNotes"></span><span class="muted" id="chFormula"></span></div>
     <div class="row"><button class="btn primary" type="button" id="chPlay">▶ Play together</button><button class="btn" type="button" id="chArp">▶ Play one by one</button></div>
     <div class="kb-scroll"><div class="kb kb-c4" id="chKb"></div></div>
+  </div>
+
+  <div class="panel" style="display:grid;gap:14px">
+    <div><h3>Guitar chord finder</h3><p class="muted" style="font-size:.93rem">Choose a root and a chord type. Dots show where to press, o = play the open string, x = don't play it. The notes under the strings are what each string sounds.</p></div>
+    <div class="chips" id="gfRoots"></div>
+    <div class="chips" id="gfTypes"></div>
+    <div class="readout"><span class="big-name" id="gfName">C</span><span class="notes-line" id="gfNotes"></span><span class="muted" id="gfFormula"></span></div>
+    <div class="gf-wrap"><div id="gfSvg"></div><div style="display:grid;gap:10px;justify-items:start;align-content:center"><div class="eyebrow">Guitar shape</div><div class="notes-line" id="gfShape"></div><div class="notes-line" id="gfStr" style="color:var(--teal)"></div><div class="muted" style="font-size:.85rem">String 6 (low E) → string 1 (high e).</div></div></div>
+    <div class="row"><button class="btn primary" type="button" id="gfPlay">▶ Strum the chord</button><button class="btn" type="button" id="gfArp">▶ One string at a time</button></div>
   </div>
 
   <div class="panel" style="display:grid;gap:14px">
@@ -1188,6 +1199,20 @@ $('#popStrum').onclick=()=>playChord(gtrMidis(popData().shape),{arp:.035,len:1.6
 document.addEventListener('keydown',e=>{if($('#pop').hidden)return;if(e.key==='Escape')closePop();if(e.key==='ArrowRight')$('#popNext').click();if(e.key==='ArrowLeft')$('#popPrev').click();});
 $('#dgGrid').onclick=e=>{const c=e.target.closest('.dg');if(!c)return;const was=c.classList.contains('shown');c.classList.add('shown');if(!$('#dgGrid').classList.contains('quiz')||was){openPop(+c.dataset.dk);return;}if(dgInst==='gtr'){const ms=c._shape.split('-').map((f,i)=>f==='x'?null:OPEN[i]+(+f)).filter(m=>m!=null);playChord(ms,{arp:.035,len:1.6,kind:'guitar'});}else playChord(c._ms,{kb:c._kb,arp:.08,len:1.4});};
 renderDg();
+
+/* ---------- guitar chord finder (shapes from the Grade 2 reference) ---------- */
+let gfR='C',gfT=0;
+$('#gfRoots').innerHTML=DGKEYS.map(k=>`<button class="chip" type="button" data-gr="${k}">${pn(k)}</button>`).join('');
+$('#gfTypes').innerHTML=DG.map((t,i)=>`<button class="chip" type="button" data-gt="${i}">${t[1].toLowerCase()}</button>`).join('');
+function gfData(){const t=DG[gfT],pc=parseName(gfR).pc;return{t,names:spell(gfR,t[3],t[4]),shape:GSHAPES[t[0]][pc]};}
+function renderGf(){const d=gfData();$('#gfName').textContent=pn(gfR)+d.t[2];$('#gfNotes').textContent=d.names.map(pn).join(' – ');$('#gfFormula').textContent=d.t[5]+' half steps';
+  $('#gfSvg').innerHTML=fretSvg(d.shape,d.names);$('#gfShape').textContent=d.shape;$('#gfStr').textContent='Notes: '+gtrNotes(d.shape,d.names).map(n=>n||'x').join(' ');
+  $$('#gfRoots .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.gr===gfR));$$('#gfTypes .chip').forEach(c=>c.setAttribute('aria-pressed',+c.dataset.gt===gfT));}
+function gfSound(arp){playChord(gtrMidis(gfData().shape),arp?{arp:.35,len:2,kind:'guitar'}:{arp:.035,len:1.6,kind:'guitar'});}
+$('#gfRoots').onclick=e=>{const c=e.target.closest('[data-gr]');if(!c)return;gfR=c.dataset.gr;renderGf();gfSound();};
+$('#gfTypes').onclick=e=>{const c=e.target.closest('[data-gt]');if(!c)return;gfT=+c.dataset.gt;renderGf();gfSound();};
+$('#gfPlay').onclick=()=>gfSound();$('#gfArp').onclick=()=>gfSound(true);
+renderGf();
 
 /* ---------- boot ---------- */
 const startView=location.hash?location.hash.slice(1):'start';show(startView);
