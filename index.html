@@ -483,6 +483,8 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <div><h3>Guitar chord finder</h3><p class="muted" style="font-size:.93rem">Choose a root and a chord type. Dots show where to press, o = play the open string, x = don't play it. The notes under the strings are what each string sounds.</p></div>
     <div class="chips" id="gfRoots"></div>
     <div class="chips" id="gfTypes"></div>
+    <div class="row"><div class="seg" role="group" aria-label="Guitar inversion" id="gfInv"></div></div>
+    <p class="muted" id="gfInvNote" style="font-size:.88rem" hidden>Inversions are played on neighbouring strings: the lowest string you play gives the bass note. Play only the strings without an x.</p>
     <div class="readout"><span class="big-name" id="gfName">C</span><span class="notes-line" id="gfNotes"></span><span class="muted" id="gfFormula"></span></div>
     <div class="gf-wrap"><div id="gfSvg"></div><div style="display:grid;gap:10px;justify-items:start;align-content:center"><div class="eyebrow">Guitar shape</div><div class="notes-line" id="gfShape"></div><div class="notes-line" id="gfStr" style="color:var(--teal)"></div><div class="muted" style="font-size:.85rem">String 6 (low E) → string 1 (high e).</div></div></div>
     <div class="row"><button class="btn primary" type="button" id="gfPlay">▶ Strum the chord</button><button class="btn" type="button" id="gfArp">▶ One string at a time</button></div>
@@ -1201,16 +1203,29 @@ $('#dgGrid').onclick=e=>{const c=e.target.closest('.dg');if(!c)return;const was=
 renderDg();
 
 /* ---------- guitar chord finder (shapes from the Grade 2 reference) ---------- */
-let gfR='C',gfT=0;
+let gfR='C',gfT=0,gfInvN=0;
 $('#gfRoots').innerHTML=DGKEYS.map(k=>`<button class="chip" type="button" data-gr="${k}">${pn(k)}</button>`).join('');
 $('#gfTypes').innerHTML=DG.map((t,i)=>`<button class="chip" type="button" data-gt="${i}">${t[1].toLowerCase()}</button>`).join('');
-function gfData(){const t=DG[gfT],pc=parseName(gfR).pc;return{t,names:spell(gfR,t[3],t[4]),shape:GSHAPES[t[0]][pc]};}
+function gfData(){const t=DG[gfT],pc=parseName(gfR).pc;let names=spell(gfR,t[3],t[4]);if(gfInvN>=names.length)gfInvN=0;for(let j=0;j<gfInvN;j++)names.push(names.shift());
+  return{t,names,shape:gfInvN?gtrInvShape(names.map(n=>parseName(n).pc)):GSHAPES[t[0]][pc]};}
+/* inversion shape on neighbouring strings: lowest string = bass note, the other strings take the other chord notes,
+   all inside one 4-fret hand position (open strings allowed); the lowest position wins */
+function gtrInvShape(pcs){const sets=pcs.length===3?[[2,3,4],[3,4,5],[1,2,3]]:[[2,3,4,5],[1,2,3,4],[0,1,2,3]];
+  const perms=a=>a.length<2?[a]:a.flatMap((x,i)=>perms([...a.slice(0,i),...a.slice(i+1)]).map(r=>[x,...r]));let best=null;
+  sets.forEach((set,si)=>perms(pcs.slice(1)).forEach(rest=>{const want=[pcs[0],...rest];
+    for(let w=0;w<=12;w++){const fr=set.map((st,i)=>{for(let f=w;f<=w+3;f++)if((GOPEN[st]+f)%12===want[i])return f;return (GOPEN[st])%12===want[i]?0:-1;});
+      if(fr.includes(-1))continue;const ms=fr.map((f,i)=>GOPEN[set[i]]+f);if(ms.slice(1).some(m=>m<=ms[0]))continue;
+      const pressed=fr.filter(f=>f>0);if(pressed.length&&Math.max(...pressed)-Math.min(...pressed)>3)continue;
+      const score=Math.max(...fr)+si*.5;if(!best||score<best.score){const sh=['x','x','x','x','x','x'];set.forEach((st,i)=>sh[st]=String(fr[i]));best={score,shape:sh.join('-')};}break;}}));
+  return best?best.shape:'x-x-x-x-x-x';}
 function renderGf(){const d=gfData();$('#gfName').textContent=pn(gfR)+d.t[2];$('#gfNotes').textContent=d.names.map(pn).join(' – ');$('#gfFormula').textContent=d.t[5]+' half steps';
   $('#gfSvg').innerHTML=fretSvg(d.shape,d.names);$('#gfShape').textContent=d.shape;$('#gfStr').textContent='Notes: '+gtrNotes(d.shape,d.names).map(n=>n||'x').join(' ');
+  $('#gfInv').innerHTML=['Root position','1st inversion','2nd inversion','3rd inversion'].slice(0,d.t[3].length).map((x,i)=>`<button type="button" data-ginv="${i}" aria-pressed="${i===gfInvN}">${x}</button>`).join('');$('#gfInvNote').hidden=!gfInvN;
   $$('#gfRoots .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.gr===gfR));$$('#gfTypes .chip').forEach(c=>c.setAttribute('aria-pressed',+c.dataset.gt===gfT));}
 function gfSound(arp){playChord(gtrMidis(gfData().shape),arp?{arp:.35,len:2,kind:'guitar'}:{arp:.035,len:1.6,kind:'guitar'});}
 $('#gfRoots').onclick=e=>{const c=e.target.closest('[data-gr]');if(!c)return;gfR=c.dataset.gr;renderGf();gfSound();};
 $('#gfTypes').onclick=e=>{const c=e.target.closest('[data-gt]');if(!c)return;gfT=+c.dataset.gt;renderGf();gfSound();};
+$('#gfInv').onclick=e=>{const c=e.target.closest('[data-ginv]');if(!c)return;gfInvN=+c.dataset.ginv;renderGf();gfSound();};
 $('#gfPlay').onclick=()=>gfSound();$('#gfArp').onclick=()=>gfSound(true);
 renderGf();
 
