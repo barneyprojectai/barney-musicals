@@ -618,7 +618,7 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <div class="muted" id="popFormula" style="text-align:center"></div>
     <div class="seg" role="group" aria-label="Inversion" id="popInv" style="justify-self:center"></div>
     <div class="kb-scroll" id="popKbWrap"><div class="kb" id="popKb" style="--kh:190px"></div></div>
-    <div class="pop-g"><div id="popGtr"></div><div style="display:grid;gap:10px;justify-items:start"><div class="eyebrow">Guitar shape</div><div class="notes-line" id="popShape"></div><div class="notes-line" id="popGtrNotes" style="color:var(--teal)"></div><div class="muted" style="font-size:.85rem">String 6 (low E) → string 1 (high e). x = don't play, 0 = open.</div></div></div>
+    <div class="pop-g" id="popGWrap"><div id="popGtr"></div><div style="display:grid;gap:10px;justify-items:start"><div class="eyebrow">Guitar shape</div><div class="notes-line" id="popShape"></div><div class="notes-line" id="popGtrNotes" style="color:var(--teal)"></div><div class="muted" style="font-size:.85rem">String 6 (low E) → string 1 (high e). x = don't play, 0 = open.</div></div></div>
     <div class="row" style="justify-content:center"><button class="btn primary" type="button" id="popPlay">▶ Play on keyboard</button><button class="btn" type="button" id="popArp">▶ One note at a time</button><button class="btn" type="button" id="popStrum">▶ Strum on guitar</button></div>
   </div>
 </div>
@@ -1131,7 +1131,7 @@ function renderPop(){const d=popData();$('#popType').textContent=d.t[1];$('#popN
   $('#popInv').innerHTML=['Root position','1st inversion','2nd inversion','3rd inversion'].slice(0,d.t[3].length).map((x,i)=>`<button type="button" data-pinv="${i}" aria-pressed="${i===popInvN}">${x}</button>`).join('');
   const lo=d.ms[0]-((d.ms[0]%12)+12)%12;popKbApi=makeKeyboard($('#popKb'),lo,lo+23,{track:false,minKey:26,octaves:true});popKbApi.add(d.ms,'chord');popKbApi.add([d.ms.find(m=>((m-d.pc)%12+12)%12===0)],'root');
   $('#popGtr').innerHTML=fretSvg(d.shape,d.names);$('#popShape').textContent=d.shape;$('#popGtrNotes').textContent='Notes: '+gtrNotes(d.shape,d.names).map(n=>n||'x').join(' ');
-  const g=dgInst==='gtr';$('#popInv').hidden=g;$('#popKbWrap').hidden=g;$('#popStrum').hidden=g;$('#popPlay').textContent=g?'▶ Strum the chord':'▶ Play on keyboard';$('#popArp').textContent=g?'▶ One string at a time':'▶ One note at a time';}
+  const g=dgInst==='gtr';$('#popInv').hidden=g;$('#popKbWrap').hidden=g;$('#popStrum').hidden=g||dgInst==='kb';$('#popGWrap').hidden=dgInst==='kb';$('#popPlay').textContent=g?'▶ Strum the chord':'▶ Play on keyboard';$('#popArp').textContent=g?'▶ One string at a time':'▶ One note at a time';}
 /* guitar mode plays the guitar shape; otherwise the keyboard voicing */
 function popSound(arp){const d=popData();if(dgInst==='gtr'){playChord(gtrMidis(d.shape),arp?{arp:.35,len:2,kind:'guitar'}:{arp:.035,len:1.6,kind:'guitar'});return;}playChord(d.ms,arp?{kb:popKbApi,arp:.35,len:2}:{kb:popKbApi});}
 function openPop(i){popI=i;popInvN=dgInv;$('#pop').hidden=false;document.body.style.overflow='hidden';renderPop();if(dgInst==='gtr')popSound();else playChord(popData().ms,{kb:popKbApi,arp:.06,len:1.4});}
