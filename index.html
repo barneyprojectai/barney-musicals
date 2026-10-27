@@ -815,6 +815,7 @@ const BOOKS={
  'keyboard-songbook-grade-1':{t:'Keyboard Songbook, Grade 1',sub:'15 songs · 10 pages',d:'Chords, notes, finger numbers and words for 15 beginner songs, including Jana Gana Mana.',s:'s2'},
  'guitar-songbook-grade-1':{t:'Guitar Songbook, Grade 1',sub:'15 songs · 10 pages',d:'The same 15 songs for guitar, with chord shapes, melody tab in first position and words.',s:'s2'},
  'guitar-scales-6-ways':{t:'Guitar Scales: 6 Ways to Play Every Scale',sub:'Guitar · 39 pages',d:'Major, minor, major and minor pentatonic and blues scales in A, each in 5 positions plus one long shape. Fretboard pictures, tabs up and down, fingers and octave markers.',s:'s2'},
+ 'guitar-scales-every-key':{t:'Guitar Scales in Every Key',sub:'Guitar · 267 pages',d:'All 12 major and 12 minor scales, each in 1, 2, 3 and 4 octaves and in 7 positions. Fretboard pictures, tabs up and down, fingers and octave markers. Use the contents page to jump to a key.',s:'s3'},
  'complete-chords-practice-book':{t:'The Complete Chords Practice Book',sub:'Barnabas Thalam · 89 pages',d:'A step-by-step keyboard course: triads, inversions, diatonic and seventh chords, progressions, chords in every key and 25 exercises.',s:'s3'},
  'keyboard-chords-practice-book':{t:'Keyboard Chords Practice Book',sub:'Barnabas Thalam · 24 chapters',d:'The chords of every major and minor key, one key per chapter: the scale, its 7 triads, harmonic minor and a daily practice routine. Every chord picture plays.',s:'s3',json:true},
  'intervals-music-theory':{t:'Intervals',sub:'Music theory · 39 pages',d:'What an interval is, half and whole steps, interval numbers, and major, minor, perfect, augmented and diminished qualities.',s:'s3'},
@@ -822,7 +823,7 @@ const BOOKS={
 };
 const SHELVES=[['Music theory books',['grade-1-music-book','grade-2-listen-and-play','intervals-music-theory','12-tones-vs-7-tones']],
   ['Keyboard books',['keyboard-beginner','keyboard-songbook-grade-1','complete-chords-practice-book','keyboard-chords-practice-book']],
-  ['Guitar books',['guitar-songbook-grade-1','guitar-scales-6-ways']]];
+  ['Guitar books',['guitar-songbook-grade-1','guitar-scales-6-ways','guitar-scales-every-key']]];
 const bookCard=([id,b])=>`<article class="book"><div class="spine ${b.s}"></div><div><h3>${b.t}</h3><div class="meta">${b.sub}</div></div><p>${b.d}</p><div><button class="btn primary small" type="button" data-read="${id}">Read</button></div></article>`;
 $('#books').innerHTML=SHELVES.map(([h,ids])=>`<h3 class="shelf-h">${h}</h3><div class="books">${ids.map(id=>bookCard([id,BOOKS[id]])).join('')}</div>`).join('');
 
