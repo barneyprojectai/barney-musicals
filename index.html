@@ -292,6 +292,8 @@ input[type=range]{accent-color:var(--teal)}
 .pop-g svg{width:min(220px,60vw);height:auto}
 .pop .wk{font-size:13px}
 .dg::after{content:"Tap to open big";font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.shelf-h{margin:22px 0 10px}
+.shelf-h:first-child{margin-top:0}
 .books{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
 .book{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;padding:18px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
 .book .meta{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
@@ -680,7 +682,7 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <h2>All the books</h2>
     <p>Open any book right here. Use the arrows to turn pages.</p>
   </div>
-  <div class="books" id="books"></div>
+  <div id="books"></div>
 </section>
 </main>
 
@@ -818,7 +820,11 @@ const BOOKS={
  'intervals-music-theory':{t:'Intervals',sub:'Music theory · 39 pages',d:'What an interval is, half and whole steps, interval numbers, and major, minor, perfect, augmented and diminished qualities.',s:'s3'},
  '12-tones-vs-7-tones':{t:'12 Tones vs 7 Tones',sub:'Handout · 1 page',d:'Why the chromatic scale has 12 notes but a major or minor scale has 7.',s:'s3'}
 };
-$('#books').innerHTML=Object.entries(BOOKS).map(([id,b])=>`<article class="book"><div class="spine ${b.s}"></div><div><h3>${b.t}</h3><div class="meta">${b.sub}</div></div><p>${b.d}</p><div><button class="btn primary small" type="button" data-read="${id}">Read</button></div></article>`).join('');
+const SHELVES=[['Music theory books',['grade-1-music-book','grade-2-listen-and-play','intervals-music-theory','12-tones-vs-7-tones']],
+  ['Keyboard books',['keyboard-beginner','keyboard-songbook-grade-1','complete-chords-practice-book','keyboard-chords-practice-book']],
+  ['Guitar books',['guitar-songbook-grade-1','guitar-scales-6-ways']]];
+const bookCard=([id,b])=>`<article class="book"><div class="spine ${b.s}"></div><div><h3>${b.t}</h3><div class="meta">${b.sub}</div></div><p>${b.d}</p><div><button class="btn primary small" type="button" data-read="${id}">Read</button></div></article>`;
+$('#books').innerHTML=SHELVES.map(([h,ids])=>`<h3 class="shelf-h">${h}</h3><div class="books">${ids.map(id=>bookCard([id,BOOKS[id]])).join('')}</div>`).join('');
 
 /* ---------- reader (pdf.js) ---------- */
 let pdfLib=null,pdfDoc=null,rPage=1,rZoom=1,rBook=null,rRender=null;
