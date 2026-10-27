@@ -553,7 +553,12 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
 
   <div class="panel" data-part="gtr" style="display:grid;gap:14px">
     <div><h3>Guitar chord shapes</h3><p class="muted" style="font-size:.93rem">Numbers are fingers (1 = index, 4 = little). o = play the open string, x = don't play it. Tap a chord to hear it strummed.</p></div>
-    <div class="guitar-grid" id="gtr"></div>
+    <h4 style="margin:4px 0 0">Major chords</h4>
+    <div class="guitar-grid" id="gtrMaj"></div>
+    <h4 style="margin:8px 0 0">Minor chords</h4>
+    <div class="guitar-grid" id="gtrMin"></div>
+    <h4 style="margin:8px 0 0">7th chords</h4>
+    <div class="guitar-grid" id="gtr7"></div>
   </div>
 
   <div class="lgroup" data-part="kb">
@@ -995,17 +1000,20 @@ renderDk();
 
 /* ---------- guitar ---------- */
 const OPEN=[40,45,50,55,59,64];
-const GTR={C:['x32010','-32-1-'],D:['xx0232','--0132'],E:['022100','-231--'],G:['320003','21---3'],A:['x02220','--123-'],Am:['x02210','--231-'],Dm:['xx0231','---231'],Em:['022000','-23---'],F:['xx3211','--3211','small F'],Fmaj7:['xx3210','--321-'],G7:['320001','32---1'],D7:['xx0212','---213'],E7:['020100','-2-1--'],A7:['x02020','--2-3-'],B7:['x21202','-213-4'],C7:['x32310','-3241-'],Bm:['x24432','-13421',2],Bb:['x13331','-12341',1]};
-function gtrSvg(name){const g=GTR[name];if(!g)return'';const fr=g[0].split(''),fi=g[1].split('');const nums=fr.filter(f=>/\d/.test(f)).map(Number).filter(n=>n>0);const barre=typeof g[2]==='number'?g[2]:0;const start=barre>1?barre:1;const x0=15,dx=12,y0=22,dy=16;let s=`<rect x="0" y="0" width="90" height="104" fill="none"/>`;
-  s+=start===1?`<rect x="${x0-1}" y="${y0-3}" width="${dx*5+2}" height="3" fill="var(--ink)"/>`:`<text x="${x0-6}" y="${y0+dy/2+4}" font-size="9" text-anchor="end" fill="var(--muted)" font-family="var(--f-mono)">${start}fr</text>`;
+const GTR={C:['x32010','-32-1-'],D:['xx0232','--0132'],E:['022100','-231--'],G:['320003','21---3'],A:['x02220','--123-'],Am:['x02210','--231-'],Dm:['xx0231','---231'],Em:['022000','-23---'],F:['xx3211','--3211','small F'],Fmaj7:['xx3210','--321-'],G7:['320001','32---1'],D7:['xx0212','---213'],E7:['020100','-2-1--'],A7:['x02020','--2-3-'],B7:['x21202','-213-4'],C7:['x32310','-3241-'],Bm:['x24432','-13421',2],Bb:['x13331','-12341',1],
+  Db:['x46664','-13331',4],Eb:['x68886','-13331',6],Gb:['244322','134211',2],Ab:['466544','134211',4],B:['x24442','-13331',2],
+  Cm:['x35543','-13421',3],'C#m':['x46654','-13421',4],Ebm:['x68876','-13421',6],Fm:['133111','134111',1],'F#m':['244222','134111',2],Gm:['355333','134111',3],'G#m':['466444','134111',4],Bbm:['x13321','-13421',1]};
+const GTR_GROUPS={gtrMaj:['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'],gtrMin:['Cm','C#m','Dm','Ebm','Em','Fm','F#m','Gm','G#m','Am','Bbm','Bm'],gtr7:['C7','D7','E7','G7','A7','B7','Fmaj7']};
+function gtrSvg(name){const g=GTR[name];if(!g)return'';const fr=g[0].split(''),fi=g[1].split('');const nums=fr.filter(f=>/\d/.test(f)).map(Number).filter(n=>n>0);const barre=typeof g[2]==='number'?g[2]:0;const start=barre>1?barre:1;const x0=21,dx=12,y0=22,dy=16;let s=`<rect x="0" y="0" width="90" height="104" fill="none"/>`;
+  s+=start===1?`<rect x="${x0-1}" y="${y0-3}" width="${dx*5+2}" height="3" fill="var(--ink)"/>`:`<text x="${x0-3}" y="${y0+dy/2+3}" font-size="8" text-anchor="end" fill="var(--ink)" font-weight="700" font-family="var(--f-mono)">${start}fr</text>`;
   for(let i=0;i<6;i++)s+=`<line x1="${x0+i*dx}" y1="${y0}" x2="${x0+i*dx}" y2="${y0+dy*4}" stroke="var(--muted)" stroke-width="1"/>`;
   for(let j=0;j<=4;j++)s+=`<line x1="${x0}" y1="${y0+j*dy}" x2="${x0+dx*5}" y2="${y0+j*dy}" stroke="var(--muted)" stroke-width="1"/>`;
   if(barre){const strs=fr.map((f,i)=>+f===barre?i:-1).filter(i=>i>=0);const a=Math.min(...strs),b=5;s+=`<rect x="${x0+a*dx-5}" y="${y0+(barre-start+.5)*dy-5}" width="${(b-a)*dx+10}" height="10" rx="5" fill="var(--teal)"/>`;}
   fr.forEach((f,i)=>{const x=x0+i*dx;if(f==='x')s+=`<text x="${x}" y="${y0-7}" font-size="10" text-anchor="middle" fill="var(--muted)" font-family="var(--f-mono)">x</text>`;else if(f==='0')s+=`<circle cx="${x}" cy="${y0-10}" r="3.2" fill="none" stroke="var(--muted)"/>`;else{const n=+f;if(barre&&n===barre&&fi[i]==='1')return;const y=y0+(n-start+.5)*dy;s+=`<circle cx="${x}" cy="${y}" r="5.6" fill="var(--teal)"/><text x="${x}" y="${y+3.4}" font-size="9" text-anchor="middle" fill="var(--surface)" font-family="var(--f-mono)" font-weight="600">${fi[i]}</text>`;}});
   s+=`<text x="${x0+dx*2.5}" y="100" font-size="8" text-anchor="middle" fill="var(--muted)" font-family="var(--f-mono)" letter-spacing="3.6">EADGBe</text>`;return s;}
 function strum(name){const g=GTR[name];if(!g)return;const ms=g[0].split('').map((f,i)=>f==='x'?null:OPEN[i]+(+f)).filter(m=>m!=null);playChord(ms,{arp:.035,len:1.6,kind:'guitar'});}
-$('#gtr').innerHTML=Object.keys(GTR).map(n=>`<button class="gcard" type="button" data-g="${n}"><svg viewBox="0 0 90 104" aria-hidden="true">${gtrSvg(n)}</svg><b>${n==='F'?'F (small)':n}</b></button>`).join('');
-$('#gtr').onclick=e=>{const b=e.target.closest('[data-g]');if(b)strum(b.dataset.g);};
+Object.entries(GTR_GROUPS).forEach(([id,names])=>{$('#'+id).innerHTML=names.map(n=>`<button class="gcard" type="button" data-g="${n}"><svg viewBox="0 0 90 104" aria-hidden="true">${gtrSvg(n)}</svg><b>${n==='F'?'F (small)':pn(n)}</b></button>`).join('');
+  $('#'+id).onclick=e=>{const b=e.target.closest('[data-g]');if(b)strum(b.dataset.g);};});
 
 /* ---------- songs ---------- */
 /* Line format: groups split by " | "; each group is "chord;notes;fingers;words". X holds the note before it, +C is the higher C. */
@@ -1201,7 +1209,7 @@ const DG=[['maj','Major','',[0,4,7],[0,2,4],'1 – 3 – 5 · 4 + 3'],['min','Mi
 const DGKEYS=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
 let dgT=0,dgInv=0,dgInst='both';
 function fretSvg(shape,names){const fr=shape.split('-');const nums=fr.filter(f=>f!=='x').map(Number).filter(n=>n>0);const mx=Math.max(0,...nums);const start=mx>4?Math.min(...nums):1;const x0=21,dx=12,y0=22,dy=16;let s='';
-  s+=start===1?`<rect x="${x0-1}" y="${y0-3}" width="${dx*5+2}" height="3" fill="var(--ink)"/>`:`<text x="${x0-6}" y="${y0+dy/2+4}" font-size="9" text-anchor="end" fill="var(--muted)" font-family="var(--f-mono)">${start}fr</text>`;
+  s+=start===1?`<rect x="${x0-1}" y="${y0-3}" width="${dx*5+2}" height="3" fill="var(--ink)"/>`:`<text x="${x0-3}" y="${y0+dy/2+3}" font-size="8" text-anchor="end" fill="var(--ink)" font-weight="700" font-family="var(--f-mono)">${start}fr</text>`;
   for(let i=0;i<6;i++)s+=`<line x1="${x0+i*dx}" y1="${y0}" x2="${x0+i*dx}" y2="${y0+dy*4}" stroke="var(--muted)"/>`;for(let j=0;j<=4;j++)s+=`<line x1="${x0}" y1="${y0+j*dy}" x2="${x0+dx*5}" y2="${y0+j*dy}" stroke="var(--muted)"/>`;
   fr.forEach((f,i)=>{const x=x0+i*dx;if(f==='x')s+=`<text x="${x}" y="${y0-7}" font-size="10" text-anchor="middle" fill="var(--muted)" font-family="var(--f-mono)">x</text>`;else if(f==='0')s+=`<circle cx="${x}" cy="${y0-10}" r="3.2" fill="none" stroke="var(--muted)"/>`;else{const y=y0+(+f-start+.5)*dy;s+=`<circle cx="${x}" cy="${y}" r="5.4" fill="var(--teal)"/>`;}});
   s+=`<text x="${x0+dx*2.5}" y="100" font-size="8" text-anchor="middle" fill="var(--muted)" font-family="var(--f-mono)" letter-spacing="3.6">EADGBe</text>`;
