@@ -1276,7 +1276,8 @@ setScInst(store.get('bt.scinst','kb')==='gtr'?'gtr':'kb');
 
 /* ---------- guitar scales in tab: 9 ways for major and minor (1 octave, 5 positions, 3 per string, 3 octaves, whole neck), up and back down ---------- */
 let gsT='major',gsI=0,gsW=0;
-const GS_WAYS=['1 octave','Position 1','Position 2','Position 3','Position 4','Position 5','3 per string','3 octaves','Whole neck'];
+const GS_WAYS=['1 octave','Position 1','Position 2','Position 3','Position 4','Position 5','3 per string','3 octaves','4 octaves (whole neck)','2 octaves'];
+const GS_ORDER=[0,9,7,8,1,2,3,4,5,6];   // order the buttons are shown in
 const GS_OFF={major:[-3,-1,2,4,7],minor:[-2,0,2,5,7]};   // where each position's 1st finger sits, in frets from the root on the low E string
 function gsLayout(t,k){const pc=parseName(k).pc;const fE=(pc-4+12)%12,fA=(pc-9+12)%12;const onE=fE<=fA+1&&fE<=7;const rs=onE?0:1,rf=onE?fE:fA;
   const lo=Math.max(0,rf-1),hi=lo+4,ms=saMidis(t,k),base=GOPEN[rs]+rf;const up=ms.map(m=>m-ms[0]+base);let s=rs;
@@ -1289,7 +1290,7 @@ function gsWayNotes(t,k,w){const pc=parseName(k).pc;
   if(w<=5){const f=GS_OFF[t].map(o=>((r+o-1)%12+12)%12+1).sort((a,b)=>a-b)[w-1],lo=f-1,hi=f+3;let m=GOPEN[0]+f,s=0;while(!P.includes(m%12))m++;
     for(;;){while(s<6&&m-GOPEN[s]>hi)s++;if(s===6)break;const fr=m-GOPEN[s];if(fr<lo)break;out.push({m,s,f:fr});m=gsNext(m,P);}
     return{notes:out,hand:f};}
-  if(w===6){let m=GOPEN[0]+r;for(let s=0;s<6;s++)for(let i=0;i<3;i++){out.push({m,s,f:m-GOPEN[s]});m=gsNext(m,P);}return{notes:out};}
+  if(w===6||w===9){let m=GOPEN[0]+r;for(let s=0;s<6;s++)for(let i=0;i<3;i++){out.push({m,s,f:m-GOPEN[s]});m=gsNext(m,P);}return{notes:w===9?out.slice(0,15):out};}   // 2 octaves = 3 notes on each of the 5 lowest strings
   // long runs: 3 octaves root to root, or every scale note from the lowest on the guitar up to fret 22; notes shared out evenly over the strings
   const ms=[];let m=GOPEN[0]+r;if(w===8){m=GOPEN[0];while(!P.includes(m%12))m++;}
   for(const top=w===7?GOPEN[0]+r+36:GOPEN[5]+22;m<=top;m=gsNext(m,P))ms.push(m);
@@ -1309,11 +1310,15 @@ function gsBoard(notes,pc){const fs=notes.map(n=>n.f);let a=Math.max(0,Math.min(
 function renderGs(){const T=SA[gsT];if(gsI>=T.keys.length)gsI=0;const k=T.keys[gsI],names=saNames(gsT,k),pc=parseName(k).pc,ways=!!GS_OFF[gsT];if(!ways)gsW=0;
   $$('#gsType button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.gs===gsT));
   $('#gsKeys').innerHTML=T.keys.map((kk,i)=>`<button class="chip" type="button" data-gsk="${i}" aria-pressed="${i===gsI}">${pn(kk)}</button>`).join('');
-  $('#gsWay').hidden=!ways;$('#gsWay').innerHTML=GS_WAYS.map((l,i)=>`<button type="button" data-gsw="${i}" aria-pressed="${i===gsW}">${i+1}. ${l}</button>`).join('');
+  $('#gsWay').hidden=!ways;$('#gsWay').innerHTML=GS_ORDER.map((w,i)=>`<button type="button" data-gsw="${w}" aria-pressed="${w===gsW}">${i+1}. ${GS_WAYS[w]}</button>`).join('');
   $('#gsName').textContent=`${pn(k)} ${T.label}`;$('#gsNotes').textContent=names.map(pn).join(' ');
   const {notes,hand}=gsWayNotes(gsT,k,gsW);const nm=m=>pn(ways?names[SC[gsT].indexOf((m-pc+120)%12)]:names[(m-notes[0].m)]);notes.forEach(n=>n.name=nm(n.m));
   const fs=notes.map(n=>n.f),fr=`frets ${Math.min(...fs)}–${Math.max(...fs)}`,home=pn(names[0]);
-  $('#gsWayInfo').innerHTML=!ways?'':(gsW===0?`Way 1: one octave in one hand position, near the nut. `:gsW<=5?`Way ${gsW+1}: position ${gsW}, ${fr}. Put your 1st finger at fret ${hand}. `:gsW===6?`Way 7: three notes on every string, ${fr}. Smooth for fast runs. `:gsW===7?`Way 8: three octaves, from the lowest ${home} to the ${home} three octaves up, ${fr}. Slide your hand up the neck as you change strings. `:`Way 9: every note of the scale on the whole guitar, from the lowest note up to fret 22, ${fr}. That is about 4 octaves. Slide your hand up the neck as you change strings. `)+`<b style="color:var(--teal)">Orange = ${home}</b>, the home note. The dashed line joins each ${home} to the ${home} an octave up.`;
+  const wn=`Way ${GS_ORDER.indexOf(gsW)+1}`;
+  $('#gsWayInfo').innerHTML=!ways?'':({0:`${wn}: one octave in one hand position, near the nut. `,9:`${wn}: two octaves, from the lowest ${home} to the ${home} two octaves up, ${fr}. `,
+    7:`${wn}: three octaves, from the lowest ${home} to the ${home} three octaves up, ${fr}. Slide your hand up the neck as you change strings. `,
+    8:`${wn}: every note of the scale on the whole guitar, from the lowest note up to fret 22, ${fr}. A guitar only reaches fret 22 (just under 4 octaves), so this is as close to 4 octaves as the neck allows. Slide your hand up as you change strings. `,
+    6:`${wn}: three notes on every string, ${fr}. Smooth for fast runs. `}[gsW]||`${wn}: position ${gsW}, ${fr}. Put your 1st finger at fret ${hand}. `)+`<b style="color:var(--teal)">Orange = ${home}</b>, the home note. The dashed line joins each ${home} to the ${home} an octave up.`;
   $('#gsBoard').innerHTML=ways?gsBoard(notes,pc):'';
   const idx=[...notes.keys(),...[...notes.keys()].reverse().slice(1)];const cols=idx.map((n,ci)=>({ci,ni:n,label:notes[n].name,p:[notes[n].s,notes[n].f],m:notes[n].m,rt:ways&&(notes[n].m-pc)%12===0}));
   let h=`<div class="tabgrid gs-tab" style="grid-template-columns:30px repeat(${cols.length},34px)"><span></span>`+cols.map(c=>`<span class="tn${c.rt?' rt':''}" data-ci="${c.ci}">${c.label}</span>`).join('');
