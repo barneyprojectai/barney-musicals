@@ -1,4 +1,4 @@
-"""Guitar Scales in Every Key: all 12 major and 12 minor scales, each in 1, 2, 3 and 4 octaves
+"""Guitar Scales in Every Fret and String: all 12 major and 12 minor scales, each in 1, 2, 3 and 4 octaves
 and in 7 positions (three notes per string), with fretboard pictures, tabs and octave markers.
 
 Usage: python3 tools/make_guitar_scales_all_keys_book.py books/guitar-scales-every-key.pdf logo.png
@@ -153,7 +153,7 @@ def page_cover(c):
     c.setFillColor(SOFT); c.rect(26, 0, 8, H, stroke=0, fill=1)
     c.drawImage(mb.LOGO, W - 250, H - 260, 190, 190, mask='auto', preserveAspectRatio=True)
     txt(c, 80, H - 140, 'Guitar Scales', 46, 'SansB')
-    txt(c, 80, H - 190, 'in Every Key', 30, 'SansB', DEEP)
+    txt(c, 80, H - 190, 'in Every Fret and String', 30, 'SansB', DEEP)
     y = H - 240
     for l in ['All 12 major and 12 minor scales.', 'Each one in 1, 2, 3 and 4 octaves and in 7 positions,',
               'with fretboard pictures, tabs, fingers and octave markers.']:
@@ -193,7 +193,7 @@ def build(out):
     for kind in ('major', 'minor'):
         for k in KEYS[kind]: index[(kind, k)] = pg; pg += pages_per_key
     c = canvas.Canvas(out, pagesize=(W, H))
-    c.setTitle('Guitar Scales in Every Key'); c.setAuthor('Barney Musicals · Shine Worshippers Academy')
+    c.setTitle('Guitar Scales in Every Fret and String'); c.setAuthor('Barney Musicals · Shine Worshippers Academy')
     page_cover(c); c.showPage()
     page_intro(c, 2); c.showPage()
     page_contents(c, 3, index); c.showPage()

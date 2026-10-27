@@ -395,6 +395,13 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
   </div>
   <nav class="chips" id="refJump" aria-label="Reference parts"></nav>
   <div class="lesson-groups" id="ref"></div>
+  <div class="lgroup" id="ref-gtrscales" style="scroll-margin-top:110px;margin-top:28px">
+    <header><h3>Guitar Scales in Every Fret and String</h3><button class="btn small" type="button" data-read="guitar-scales-every-key">Read the book</button></header>
+    <p>Pick major or minor, then a key, then the way you want to practise. The book opens on that page.</p>
+    <div class="seg" role="group" aria-label="Major or minor" id="gkKind"><button type="button" data-gkk="major" aria-pressed="true">Major</button><button type="button" data-gkk="minor" aria-pressed="false">Minor</button></div>
+    <div class="chips" id="gkKeys"></div>
+    <ul class="ref-list" id="gkWays"></ul>
+  </div>
 </section>
 
 <!-- THEORY -->
@@ -815,7 +822,7 @@ const BOOKS={
  'keyboard-songbook-grade-1':{t:'Keyboard Songbook, Grade 1',sub:'15 songs · 10 pages',d:'Chords, notes, finger numbers and words for 15 beginner songs, including Jana Gana Mana.',s:'s2'},
  'guitar-songbook-grade-1':{t:'Guitar Songbook, Grade 1',sub:'15 songs · 10 pages',d:'The same 15 songs for guitar, with chord shapes, melody tab in first position and words.',s:'s2'},
  'guitar-scales-6-ways':{t:'Guitar Scales: 6 Ways to Play Every Scale',sub:'Guitar · 39 pages',d:'Major, minor, major and minor pentatonic and blues scales in A, each in 5 positions plus one long shape. Fretboard pictures, tabs up and down, fingers and octave markers.',s:'s2'},
- 'guitar-scales-every-key':{t:'Guitar Scales in Every Key',sub:'Guitar · 267 pages',d:'All 12 major and 12 minor scales, each in 1, 2, 3 and 4 octaves and in 7 positions. Fretboard pictures, tabs up and down, fingers and octave markers. Use the contents page to jump to a key.',s:'s3'},
+ 'guitar-scales-every-key':{t:'Guitar Scales in Every Fret and String',sub:'Guitar · 267 pages',d:'All 12 major and 12 minor scales, each in 1, 2, 3 and 4 octaves and in 7 positions. Fretboard pictures, tabs up and down, fingers and octave markers. Jump to any key and way from the Reference page.',s:'s3'},
  'complete-chords-practice-book':{t:'The Complete Chords Practice Book',sub:'Barnabas Thalam · 89 pages',d:'A step-by-step keyboard course: triads, inversions, diatonic and seventh chords, progressions, chords in every key and 25 exercises.',s:'s3'},
  'keyboard-chords-practice-book':{t:'Keyboard Chords Practice Book',sub:'Barnabas Thalam · 24 chapters',d:'The chords of every major and minor key, one key per chapter: the scale, its 7 triads, harmonic minor and a daily practice routine. Every chord picture plays.',s:'s3',json:true},
  'intervals-music-theory':{t:'Intervals',sub:'Music theory · 39 pages',d:'What an interval is, half and whole steps, interval numbers, and major, minor, perfect, augmented and diminished qualities.',s:'s3'},
@@ -880,9 +887,20 @@ const REF=[
  ['gtr-inv','Guitar inversions of 7th and sus chords','',[[44,'Major 7th (maj7)',89],[45,'Dominant 7th (7)',90],[46,'Minor 7th (m7)',91],[47,'Minor major 7th (mMaj7)',92],[48,'Half diminished (m7♭5)',93],[49,'Diminished 7th (dim7)',94],[50,'Sus2',95],[51,'Sus4',95],[52,'7sus2',96],[53,'7sus4',97]]],
  ['summary','Grade 2 summary','The quick reference for tune, rhythm, scales and chords, and a final message to every student.',[['★','Grade 2 summary: quick reference',99],['★','Final message to every student',100]]]
 ];
-$('#refJump').innerHTML=REF.map(([id,t])=>`<a class="chip" href="#ref-${id}" data-refjump="${id}" style="text-decoration:none;color:inherit">${t}</a>`).join('');
+$('#refJump').innerHTML=[...REF,['gtrscales','Guitar scales in every key']].map(([id,t])=>`<a class="chip" href="#ref-${id}" data-refjump="${id}" style="text-decoration:none;color:inherit">${t}</a>`).join('');
 $('#refJump').addEventListener('click',e=>{const a=e.target.closest('[data-refjump]');if(!a)return;e.preventDefault();e.stopPropagation();document.getElementById('ref-'+a.dataset.refjump).scrollIntoView({behavior:'smooth',block:'start'});},true);
 $('#ref').innerHTML=REF.map(([id,t,d,items])=>`<div class="lgroup" id="ref-${id}" style="scroll-margin-top:110px"><header><h3>${t}</h3><span class="eyebrow">Pages ${items[0][2]}–${items[items.length-1][2]}</span></header>${d?`<p>${d}</p>`:''}<ul class="ref-list">${items.map(([n,tt,pg])=>`<li><button type="button" data-read="grade-2-listen-and-play" data-page="${pg}"><span class="n">${n}</span><span>${tt}</span><span class="pg">p. ${pg}</span></button></li>`).join('')}</ul></div>`).join('');
+/* Guitar Scales in Every Fret and String: 3 intro pages, then 11 pages per key (majors C..B, then minors C..B) */
+const GK={major:['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'],minor:['C','C#','D','Eb','E','F','F#','G','G#','A','Bb','B']};
+const GK_WAYS=['1 octave','2 octaves','3 octaves','4 octaves (whole neck)','Position 1','Position 2','Position 3','Position 4','Position 5','Position 6','Position 7'];
+let gkT='major',gkI=0;
+function renderGk(){$$('#gkKind button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.gkk===gkT));
+  $('#gkKeys').innerHTML=GK[gkT].map((k,i)=>`<button class="chip" type="button" data-gki="${i}" aria-pressed="${i===gkI}">${pn(k)}${gkT==='minor'?'m':''}</button>`).join('');
+  const first=4+((gkT==='minor'?12:0)+gkI)*11,name=`${pn(GK[gkT][gkI])} ${gkT}`;
+  $('#gkWays').innerHTML=GK_WAYS.map((w,i)=>`<li><button type="button" data-read="guitar-scales-every-key" data-page="${first+i}"><span class="n">${i+1}</span><span>${name} · ${w}</span><span class="pg">p. ${first+i}</span></button></li>`).join('');}
+$('#gkKind').onclick=e=>{const b=e.target.closest('[data-gkk]');if(b){gkT=b.dataset.gkk;renderGk();}};
+$('#gkKeys').onclick=e=>{const b=e.target.closest('[data-gki]');if(b){gkI=+b.dataset.gki;renderGk();}};
+renderGk();
 const IVB=[[1,'Introduction to Intervals','Definition, distance, up and down, melodic and harmonic.',2],[2,'Understanding Note Distance','Semitones, whole tones, chromatic and diatonic movement.',8],[3,'Interval Numbers','Unison through octave, and how to count them.',14],[4,'Interval Qualities','Major, minor, perfect, augmented and diminished.',25],[5,'Major & Minor Intervals','2nds, 3rds, 6ths and 7ths in both qualities.',31]];
 $('#ivBook').innerHTML=IVB.map(([n,t,d,p])=>`<li class="lesson"><span class="n">${n}</span><h3>${t}</h3><p>${d}</p><div class="acts"><button type="button" data-read="intervals-music-theory" data-page="${p}">Open at page ${p}</button></div></li>`).join('');
 const KCB=['C major','D major','E major','F major','G major','A major','B major','D♭ major (C♯)','E♭ major (D♯)','G♭ major (F♯)','A♭ major (G♯)','B♭ major (A♯)','C minor','D minor','E minor','F minor','G minor','A minor','B minor','C♯ minor (D♭)','E♭ minor (D♯)','F♯ minor (G♭)','A♭ minor (G♯)','B♭ minor (A♯)'];
