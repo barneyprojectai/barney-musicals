@@ -292,6 +292,8 @@ input[type=range]{accent-color:var(--teal)}
 .pop-g svg{width:min(220px,60vw);height:auto}
 .pop .wk{font-size:13px}
 .dg::after{content:"Tap to open big";font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.shelf-h{margin:22px 0 10px}
+.shelf-h:first-child{margin-top:0}
 .books{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:14px}
 .book{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;padding:18px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
 .book .meta{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
@@ -553,7 +555,12 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
 
   <div class="panel" data-part="gtr" style="display:grid;gap:14px">
     <div><h3>Guitar chord shapes</h3><p class="muted" style="font-size:.93rem">Numbers are fingers (1 = index, 4 = little). o = play the open string, x = don't play it. Tap a chord to hear it strummed.</p></div>
-    <div class="guitar-grid" id="gtr"></div>
+    <h4 style="margin:4px 0 0">Major chords</h4>
+    <div class="guitar-grid" id="gtrMaj"></div>
+    <h4 style="margin:8px 0 0">Minor chords</h4>
+    <div class="guitar-grid" id="gtrMin"></div>
+    <h4 style="margin:8px 0 0">7th chords</h4>
+    <div class="guitar-grid" id="gtr7"></div>
   </div>
 
   <div class="lgroup" data-part="kb">
@@ -675,7 +682,7 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
     <h2>All the books</h2>
     <p>Open any book right here. Use the arrows to turn pages.</p>
   </div>
-  <div class="books" id="books"></div>
+  <div id="books"></div>
 </section>
 </main>
 
@@ -813,7 +820,11 @@ const BOOKS={
  'intervals-music-theory':{t:'Intervals',sub:'Music theory · 39 pages',d:'What an interval is, half and whole steps, interval numbers, and major, minor, perfect, augmented and diminished qualities.',s:'s3'},
  '12-tones-vs-7-tones':{t:'12 Tones vs 7 Tones',sub:'Handout · 1 page',d:'Why the chromatic scale has 12 notes but a major or minor scale has 7.',s:'s3'}
 };
-$('#books').innerHTML=Object.entries(BOOKS).map(([id,b])=>`<article class="book"><div class="spine ${b.s}"></div><div><h3>${b.t}</h3><div class="meta">${b.sub}</div></div><p>${b.d}</p><div><button class="btn primary small" type="button" data-read="${id}">Read</button></div></article>`).join('');
+const SHELVES=[['Music theory books',['grade-1-music-book','grade-2-listen-and-play','intervals-music-theory','12-tones-vs-7-tones']],
+  ['Keyboard books',['keyboard-beginner','keyboard-songbook-grade-1','complete-chords-practice-book','keyboard-chords-practice-book']],
+  ['Guitar books',['guitar-songbook-grade-1','guitar-scales-6-ways']]];
+const bookCard=([id,b])=>`<article class="book"><div class="spine ${b.s}"></div><div><h3>${b.t}</h3><div class="meta">${b.sub}</div></div><p>${b.d}</p><div><button class="btn primary small" type="button" data-read="${id}">Read</button></div></article>`;
+$('#books').innerHTML=SHELVES.map(([h,ids])=>`<h3 class="shelf-h">${h}</h3><div class="books">${ids.map(id=>bookCard([id,BOOKS[id]])).join('')}</div>`).join('');
 
 /* ---------- reader (pdf.js) ---------- */
 let pdfLib=null,pdfDoc=null,rPage=1,rZoom=1,rBook=null,rRender=null;
@@ -995,17 +1006,20 @@ renderDk();
 
 /* ---------- guitar ---------- */
 const OPEN=[40,45,50,55,59,64];
-const GTR={C:['x32010','-32-1-'],D:['xx0232','--0132'],E:['022100','-231--'],G:['320003','21---3'],A:['x02220','--123-'],Am:['x02210','--231-'],Dm:['xx0231','---231'],Em:['022000','-23---'],F:['xx3211','--3211','small F'],Fmaj7:['xx3210','--321-'],G7:['320001','32---1'],D7:['xx0212','---213'],E7:['020100','-2-1--'],A7:['x02020','--2-3-'],B7:['x21202','-213-4'],C7:['x32310','-3241-'],Bm:['x24432','-13421',2],Bb:['x13331','-12341',1]};
-function gtrSvg(name){const g=GTR[name];if(!g)return'';const fr=g[0].split(''),fi=g[1].split('');const nums=fr.filter(f=>/\d/.test(f)).map(Number).filter(n=>n>0);const barre=typeof g[2]==='number'?g[2]:0;const start=barre>1?barre:1;const x0=15,dx=12,y0=22,dy=16;let s=`<rect x="0" y="0" width="90" height="104" fill="none"/>`;
-  s+=start===1?`<rect x="${x0-1}" y="${y0-3}" width="${dx*5+2}" height="3" fill="var(--ink)"/>`:`<text x="${x0-6}" y="${y0+dy/2+4}" font-size="9" text-anchor="end" fill="var(--muted)" font-family="var(--f-mono)">${start}fr</text>`;
+const GTR={C:['x32010','-32-1-'],D:['xx0232','--0132'],E:['022100','-231--'],G:['320003','21---3'],A:['x02220','--123-'],Am:['x02210','--231-'],Dm:['xx0231','---231'],Em:['022000','-23---'],F:['xx3211','--3211','small F'],Fmaj7:['xx3210','--321-'],G7:['320001','32---1'],D7:['xx0212','---213'],E7:['020100','-2-1--'],A7:['x02020','--2-3-'],B7:['x21202','-213-4'],C7:['x32310','-3241-'],Bm:['x24432','-13421',2],Bb:['x13331','-12341',1],
+  Db:['x46664','-13331',4],Eb:['x68886','-13331',6],Gb:['244322','134211',2],Ab:['466544','134211',4],B:['x24442','-13331',2],
+  Cm:['x35543','-13421',3],'C#m':['x46654','-13421',4],Ebm:['x68876','-13421',6],Fm:['133111','134111',1],'F#m':['244222','134111',2],Gm:['355333','134111',3],'G#m':['466444','134111',4],Bbm:['x13321','-13421',1]};
+const GTR_GROUPS={gtrMaj:['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'],gtrMin:['Cm','C#m','Dm','Ebm','Em','Fm','F#m','Gm','G#m','Am','Bbm','Bm'],gtr7:['C7','D7','E7','G7','A7','B7','Fmaj7']};
+function gtrSvg(name){const g=GTR[name];if(!g)return'';const fr=g[0].split(''),fi=g[1].split('');const nums=fr.filter(f=>/\d/.test(f)).map(Number).filter(n=>n>0);const barre=typeof g[2]==='number'?g[2]:0;const start=barre>1?barre:1;const x0=21,dx=12,y0=22,dy=16;let s=`<rect x="0" y="0" width="90" height="104" fill="none"/>`;
+  s+=start===1?`<rect x="${x0-1}" y="${y0-3}" width="${dx*5+2}" height="3" fill="var(--ink)"/>`:`<text x="${x0-3}" y="${y0+dy/2+3}" font-size="8" text-anchor="end" fill="var(--ink)" font-weight="700" font-family="var(--f-mono)">${start}fr</text>`;
   for(let i=0;i<6;i++)s+=`<line x1="${x0+i*dx}" y1="${y0}" x2="${x0+i*dx}" y2="${y0+dy*4}" stroke="var(--muted)" stroke-width="1"/>`;
   for(let j=0;j<=4;j++)s+=`<line x1="${x0}" y1="${y0+j*dy}" x2="${x0+dx*5}" y2="${y0+j*dy}" stroke="var(--muted)" stroke-width="1"/>`;
   if(barre){const strs=fr.map((f,i)=>+f===barre?i:-1).filter(i=>i>=0);const a=Math.min(...strs),b=5;s+=`<rect x="${x0+a*dx-5}" y="${y0+(barre-start+.5)*dy-5}" width="${(b-a)*dx+10}" height="10" rx="5" fill="var(--teal)"/>`;}
   fr.forEach((f,i)=>{const x=x0+i*dx;if(f==='x')s+=`<text x="${x}" y="${y0-7}" font-size="10" text-anchor="middle" fill="var(--muted)" font-family="var(--f-mono)">x</text>`;else if(f==='0')s+=`<circle cx="${x}" cy="${y0-10}" r="3.2" fill="none" stroke="var(--muted)"/>`;else{const n=+f;if(barre&&n===barre&&fi[i]==='1')return;const y=y0+(n-start+.5)*dy;s+=`<circle cx="${x}" cy="${y}" r="5.6" fill="var(--teal)"/><text x="${x}" y="${y+3.4}" font-size="9" text-anchor="middle" fill="var(--surface)" font-family="var(--f-mono)" font-weight="600">${fi[i]}</text>`;}});
   s+=`<text x="${x0+dx*2.5}" y="100" font-size="8" text-anchor="middle" fill="var(--muted)" font-family="var(--f-mono)" letter-spacing="3.6">EADGBe</text>`;return s;}
 function strum(name){const g=GTR[name];if(!g)return;const ms=g[0].split('').map((f,i)=>f==='x'?null:OPEN[i]+(+f)).filter(m=>m!=null);playChord(ms,{arp:.035,len:1.6,kind:'guitar'});}
-$('#gtr').innerHTML=Object.keys(GTR).map(n=>`<button class="gcard" type="button" data-g="${n}"><svg viewBox="0 0 90 104" aria-hidden="true">${gtrSvg(n)}</svg><b>${n==='F'?'F (small)':n}</b></button>`).join('');
-$('#gtr').onclick=e=>{const b=e.target.closest('[data-g]');if(b)strum(b.dataset.g);};
+Object.entries(GTR_GROUPS).forEach(([id,names])=>{$('#'+id).innerHTML=names.map(n=>`<button class="gcard" type="button" data-g="${n}"><svg viewBox="0 0 90 104" aria-hidden="true">${gtrSvg(n)}</svg><b>${n==='F'?'F (small)':pn(n)}</b></button>`).join('');
+  $('#'+id).onclick=e=>{const b=e.target.closest('[data-g]');if(b)strum(b.dataset.g);};});
 
 /* ---------- songs ---------- */
 /* Line format: groups split by " | "; each group is "chord;notes;fingers;words". X holds the note before it, +C is the higher C. */
@@ -1201,7 +1215,7 @@ const DG=[['maj','Major','',[0,4,7],[0,2,4],'1 – 3 – 5 · 4 + 3'],['min','Mi
 const DGKEYS=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
 let dgT=0,dgInv=0,dgInst='both';
 function fretSvg(shape,names){const fr=shape.split('-');const nums=fr.filter(f=>f!=='x').map(Number).filter(n=>n>0);const mx=Math.max(0,...nums);const start=mx>4?Math.min(...nums):1;const x0=21,dx=12,y0=22,dy=16;let s='';
-  s+=start===1?`<rect x="${x0-1}" y="${y0-3}" width="${dx*5+2}" height="3" fill="var(--ink)"/>`:`<text x="${x0-6}" y="${y0+dy/2+4}" font-size="9" text-anchor="end" fill="var(--muted)" font-family="var(--f-mono)">${start}fr</text>`;
+  s+=start===1?`<rect x="${x0-1}" y="${y0-3}" width="${dx*5+2}" height="3" fill="var(--ink)"/>`:`<text x="${x0-3}" y="${y0+dy/2+3}" font-size="8" text-anchor="end" fill="var(--ink)" font-weight="700" font-family="var(--f-mono)">${start}fr</text>`;
   for(let i=0;i<6;i++)s+=`<line x1="${x0+i*dx}" y1="${y0}" x2="${x0+i*dx}" y2="${y0+dy*4}" stroke="var(--muted)"/>`;for(let j=0;j<=4;j++)s+=`<line x1="${x0}" y1="${y0+j*dy}" x2="${x0+dx*5}" y2="${y0+j*dy}" stroke="var(--muted)"/>`;
   fr.forEach((f,i)=>{const x=x0+i*dx;if(f==='x')s+=`<text x="${x}" y="${y0-7}" font-size="10" text-anchor="middle" fill="var(--muted)" font-family="var(--f-mono)">x</text>`;else if(f==='0')s+=`<circle cx="${x}" cy="${y0-10}" r="3.2" fill="none" stroke="var(--muted)"/>`;else{const y=y0+(+f-start+.5)*dy;s+=`<circle cx="${x}" cy="${y}" r="5.4" fill="var(--teal)"/>`;}});
   s+=`<text x="${x0+dx*2.5}" y="100" font-size="8" text-anchor="middle" fill="var(--muted)" font-family="var(--f-mono)" letter-spacing="3.6">EADGBe</text>`;
@@ -1274,9 +1288,10 @@ function setScInst(v){$$('#scInst button').forEach(b=>b.setAttribute('aria-selec
 $('#scInst').onclick=e=>{const b=e.target.closest('[data-scinst]');if(b)setScInst(b.dataset.scinst);};
 setScInst(store.get('bt.scinst','kb')==='gtr'?'gtr':'kb');
 
-/* ---------- guitar scales in tab: 7 ways for major and minor (1 octave, 5 positions, 3 per string), up and back down ---------- */
+/* ---------- guitar scales in tab: 9 ways for major and minor (1 octave, 5 positions, 3 per string, 3 octaves, whole neck), up and back down ---------- */
 let gsT='major',gsI=0,gsW=0;
-const GS_WAYS=['1 octave','Position 1','Position 2','Position 3','Position 4','Position 5','3 per string'];
+const GS_WAYS=['1 octave','Position 1','Position 2','Position 3','Position 4','Position 5','3 per string','3 octaves','4 octaves (whole neck)','2 octaves'];
+const GS_ORDER=[0,9,7,8,1,2,3,4,5,6];   // order the buttons are shown in
 const GS_OFF={major:[-3,-1,2,4,7],minor:[-2,0,2,5,7]};   // where each position's 1st finger sits, in frets from the root on the low E string
 function gsLayout(t,k){const pc=parseName(k).pc;const fE=(pc-4+12)%12,fA=(pc-9+12)%12;const onE=fE<=fA+1&&fE<=7;const rs=onE?0:1,rf=onE?fE:fA;
   const lo=Math.max(0,rf-1),hi=lo+4,ms=saMidis(t,k),base=GOPEN[rs]+rf;const up=ms.map(m=>m-ms[0]+base);let s=rs;
@@ -1289,9 +1304,14 @@ function gsWayNotes(t,k,w){const pc=parseName(k).pc;
   if(w<=5){const f=GS_OFF[t].map(o=>((r+o-1)%12+12)%12+1).sort((a,b)=>a-b)[w-1],lo=f-1,hi=f+3;let m=GOPEN[0]+f,s=0;while(!P.includes(m%12))m++;
     for(;;){while(s<6&&m-GOPEN[s]>hi)s++;if(s===6)break;const fr=m-GOPEN[s];if(fr<lo)break;out.push({m,s,f:fr});m=gsNext(m,P);}
     return{notes:out,hand:f};}
-  let m=GOPEN[0]+r;for(let s=0;s<6;s++)for(let i=0;i<3;i++){out.push({m,s,f:m-GOPEN[s]});m=gsNext(m,P);}return{notes:out};}
+  if(w===6||w===9){let m=GOPEN[0]+r;for(let s=0;s<6;s++)for(let i=0;i<3;i++){out.push({m,s,f:m-GOPEN[s]});m=gsNext(m,P);}return{notes:w===9?out.slice(0,15):out};}   // 2 octaves = 3 notes on each of the 5 lowest strings
+  // long runs: 3 octaves root to root, or every scale note from the lowest on the guitar up to fret 22; notes shared out evenly over the strings
+  const ms=[];let m=GOPEN[0]+r;if(w===8){m=GOPEN[0];while(!P.includes(m%12))m++;}
+  for(const top=w===7?GOPEN[0]+r+36:GOPEN[5]+22;m<=top;m=gsNext(m,P))ms.push(m);
+  let i=0;for(let s=0;s<6;s++){const n=Math.floor(ms.length/6)+(s<ms.length%6?1:0);for(let j=0;j<n;j++,i++)out.push({m:ms[i],s,f:ms[i]-GOPEN[s]});}
+  return{notes:out};}
 function gsBoard(notes,pc){const fs=notes.map(n=>n.f);let a=Math.max(0,Math.min(...fs)-1),b=Math.max(...fs)+1;if(b-a<5)b=a+5;
-  const cw=46,sg=26,x0=34,y0=16,nut=a===0,w=x0+(b-a+1)*cw+8,hh=y0+5*sg+34,fx=f=>x0+(f-a+.5)*cw,sy=s=>y0+(5-s)*sg;
+  const cw=b-a>12?36:46,sg=26,x0=34,y0=16,nut=a===0,w=x0+(b-a+1)*cw+8,hh=y0+5*sg+34,fx=f=>x0+(f-a+.5)*cw,sy=s=>y0+(5-s)*sg;
   let g=`<svg width="${w}" height="${hh}" viewBox="0 0 ${w} ${hh}" role="img" aria-label="Fretboard picture">`;
   g+=`<rect x="${x0}" y="${y0-10}" width="${(b-a+1)*cw}" height="${5*sg+20}" fill="var(--saffron-soft)"/>`;
   for(let i=0;i<=b-a+1;i++){const x=x0+i*cw;g+=`<line x1="${x}" x2="${x}" y1="${y0-10}" y2="${y0+5*sg+10}" stroke="${nut&&i===1?'var(--ink)':'var(--kw-edge)'}" stroke-width="${nut&&i===1?5:2}"/>`;}
@@ -1304,11 +1324,15 @@ function gsBoard(notes,pc){const fs=notes.map(n=>n.f);let a=Math.max(0,Math.min(
 function renderGs(){const T=SA[gsT];if(gsI>=T.keys.length)gsI=0;const k=T.keys[gsI],names=saNames(gsT,k),pc=parseName(k).pc,ways=!!GS_OFF[gsT];if(!ways)gsW=0;
   $$('#gsType button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.gs===gsT));
   $('#gsKeys').innerHTML=T.keys.map((kk,i)=>`<button class="chip" type="button" data-gsk="${i}" aria-pressed="${i===gsI}">${pn(kk)}</button>`).join('');
-  $('#gsWay').hidden=!ways;$('#gsWay').innerHTML=GS_WAYS.map((l,i)=>`<button type="button" data-gsw="${i}" aria-pressed="${i===gsW}">${i+1}. ${l}</button>`).join('');
+  $('#gsWay').hidden=!ways;$('#gsWay').innerHTML=GS_ORDER.map((w,i)=>`<button type="button" data-gsw="${w}" aria-pressed="${w===gsW}">${i+1}. ${GS_WAYS[w]}</button>`).join('');
   $('#gsName').textContent=`${pn(k)} ${T.label}`;$('#gsNotes').textContent=names.map(pn).join(' ');
   const {notes,hand}=gsWayNotes(gsT,k,gsW);const nm=m=>pn(ways?names[SC[gsT].indexOf((m-pc+120)%12)]:names[(m-notes[0].m)]);notes.forEach(n=>n.name=nm(n.m));
   const fs=notes.map(n=>n.f),fr=`frets ${Math.min(...fs)}–${Math.max(...fs)}`,home=pn(names[0]);
-  $('#gsWayInfo').innerHTML=!ways?'':(gsW===0?`Way 1: one octave in one hand position, near the nut. `:gsW<=5?`Way ${gsW+1}: position ${gsW}, ${fr}. Put your 1st finger at fret ${hand}. `:`Way 7: three notes on every string, ${fr}. Smooth for fast runs. `)+`<b style="color:var(--teal)">Orange = ${home}</b>, the home note. The dashed line joins each ${home} to the ${home} an octave up.`;
+  const wn=`Way ${GS_ORDER.indexOf(gsW)+1}`;
+  $('#gsWayInfo').innerHTML=!ways?'':({0:`${wn}: one octave in one hand position, near the nut. `,9:`${wn}: two octaves, from the lowest ${home} to the ${home} two octaves up, ${fr}. `,
+    7:`${wn}: three octaves, from the lowest ${home} to the ${home} three octaves up, ${fr}. Slide your hand up the neck as you change strings. `,
+    8:`${wn}: every note of the scale on the whole guitar, from the lowest note up to fret 22, ${fr}. A guitar only reaches fret 22 (just under 4 octaves), so this is as close to 4 octaves as the neck allows. Slide your hand up as you change strings. `,
+    6:`${wn}: three notes on every string, ${fr}. Smooth for fast runs. `}[gsW]||`${wn}: position ${gsW}, ${fr}. Put your 1st finger at fret ${hand}. `)+`<b style="color:var(--teal)">Orange = ${home}</b>, the home note. The dashed line joins each ${home} to the ${home} an octave up.`;
   $('#gsBoard').innerHTML=ways?gsBoard(notes,pc):'';
   const idx=[...notes.keys(),...[...notes.keys()].reverse().slice(1)];const cols=idx.map((n,ci)=>({ci,ni:n,label:notes[n].name,p:[notes[n].s,notes[n].f],m:notes[n].m,rt:ways&&(notes[n].m-pc)%12===0}));
   let h=`<div class="tabgrid gs-tab" style="grid-template-columns:30px repeat(${cols.length},34px)"><span></span>`+cols.map(c=>`<span class="tn${c.rt?' rt':''}" data-ci="${c.ci}">${c.label}</span>`).join('');
