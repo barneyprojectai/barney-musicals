@@ -820,6 +820,7 @@ const BOOKS={
  'grade-1-music-book':{t:'Grade 1 Music Book',sub:'Barnabas Thalam · 65 pages',d:'Melody, rhythm, scales and chords in 25 lessons, plus extra keyboard lessons on accompaniment, octaves, split, dual tones and pitch bend.',s:''},
  'grade-2-listen-and-play':{t:'Grade 2: Listen and Play',sub:'Barnabas Thalam · 100 pages',d:'Play what you hear. Observe the tune, keep the rhythm in 2/4, 3/4, 4/4 and 6/8, find the scale, and write and play the chords.',s:'s2'},
  'keyboard-songbook-grade-1':{t:'Keyboard Songbook, Grade 1',sub:'15 songs · 10 pages',d:'Chords, notes, finger numbers and words for 15 beginner songs, including Jana Gana Mana.',s:'s2'},
+ 'keyboard-songbook-advanced':{t:'Keyboard Songbook, Grade 1: Advanced',sub:'Keyboard · 76 pages',d:'All 15 Grade 1 songs in 4 octaves across the keyboard, with the left hand playing smooth chords in inversions, keyboard pictures, note names with octave numbers, fingers and words.',s:'s2'},
  'guitar-songbook-grade-1':{t:'Guitar Songbook, Grade 1',sub:'15 songs · 10 pages',d:'The same 15 songs for guitar, with chord shapes, melody tab in first position and words.',s:'s2'},
  'guitar-scales-6-ways':{t:'Guitar Scales: 6 Ways to Play Every Scale',sub:'Guitar · 39 pages',d:'Major, minor, major and minor pentatonic and blues scales in A, each in 5 positions plus one long shape. Fretboard pictures, tabs up and down, fingers and octave markers.',s:'s2'},
  'guitar-scales-every-key':{t:'Guitar Scales in Every Fret and String',sub:'Guitar · 267 pages',d:'All 12 major and 12 minor scales, each in 1, 2, 3 and 4 octaves and in 7 positions. Fretboard pictures, tabs up and down, fingers and octave markers. Jump to any key and way from the Reference page.',s:'s3'},
@@ -830,7 +831,7 @@ const BOOKS={
  '12-tones-vs-7-tones':{t:'12 Tones vs 7 Tones',sub:'Handout · 1 page',d:'Why the chromatic scale has 12 notes but a major or minor scale has 7.',s:'s3'}
 };
 const SHELVES=[['Music theory books',['grade-1-music-book','grade-2-listen-and-play','intervals-music-theory','12-tones-vs-7-tones']],
-  ['Keyboard books',['keyboard-beginner','keyboard-songbook-grade-1','complete-chords-practice-book','keyboard-chords-practice-book']],
+  ['Keyboard books',['keyboard-beginner','keyboard-songbook-grade-1','keyboard-songbook-advanced','complete-chords-practice-book','keyboard-chords-practice-book']],
   ['Guitar books',['guitar-songbook-grade-1','guitar-songbook-octaves-positions','guitar-scales-6-ways','guitar-scales-every-key']]];
 const bookCard=([id,b])=>`<article class="book"><div class="spine ${b.s}"></div><div><h3>${b.t}</h3><div class="meta">${b.sub}</div></div><p>${b.d}</p><div><button class="btn primary small" type="button" data-read="${id}">Read</button></div></article>`;
 $('#books').innerHTML=SHELVES.map(([h,ids])=>`<h3 class="shelf-h">${h}</h3><div class="books">${ids.map(id=>bookCard([id,BOOKS[id]])).join('')}</div>`).join('');
